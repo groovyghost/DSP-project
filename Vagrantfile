@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERISON) do |config|
     v.memory = 1024
     v.linked_clone = true
   end
-  # Database server.
+  # MongoDB server.
   config.vm.define "mongo.db" do |mongo|
     mongo.vm.hostname = "mongo.db"
     mongo.vm.network "forwarded_port", guest: 27017, host: 27017
@@ -22,7 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERISON) do |config|
     end
   end
 
-  # Database server.
+  # MySQL server.
   config.vm.define "mysql.db" do |mysql|
     mysql.vm.hostname = "mysql.db"
     mysql.vm.network "forwarded_port", guest: 3306, host: 3306
