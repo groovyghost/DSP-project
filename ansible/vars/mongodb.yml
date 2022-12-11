@@ -1,0 +1,6 @@
+admin_db: admin
+admin_user: myadmin
+admin_pwd: admin123
+user_db: test
+user_name: testuser
+user_pwd: testpwd

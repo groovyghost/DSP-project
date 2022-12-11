@@ -1,0 +1,55 @@
+---
+- hosts: mongodb
+  become: true
+
+  vars_files:
+    - vars/mongodb.yml
+
+  collections:
+    - community.mongodb
+
+  roles:
+    - { role: mongodb_repository, mongodb_version: "4.4" }
+    - { role: mongodb_install }
+
+  tasks:
+    - name: Install PIP3
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+        update_cache: true
+
+    - name: Install Pymongo
+      ansible.builtin.pip:
+        name: pymongo==4.3.3
+        state: present
+
+    - name: MongoDB configuration
+      include_role:
+        name: mongodb_config
+      vars:
+        config_port: 27017
+        bind_ip: 0.0.0.0 # "{{ hostvars['mongodb'].ansible_host }}"
+        authorization: enabled
+        replicaset: false
+        skip_restart: false
+
+    - name: Add mongodb admin
+      include_role:
+        name: mongodb_auth
+      vars:
+        mongodb_admin_db: "{{ admin_db }}"
+        mongodb_admin_user: "{{ admin_user }}"
+        mongodb_admin_pwd: "{{ admin_pwd }}"
+
+    - name: Add mongodb users
+      community.mongodb.mongodb_user:
+        login_user: "{{ admin_user}}"
+        login_password: "{{ admin_pwd }}"
+        database: "{{ user_db }}"
+        user: "{{ user_name }}"
+        password: "{{ user_pwd }}"
+        state: present
+        roles:
+          - db: "{{ user_db }}"
+            role: readWrite

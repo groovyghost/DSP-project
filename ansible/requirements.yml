@@ -1,0 +1,10 @@
+roles:
+  - name: geerlingguy.mysql
+    version: 4.2.1
+
+collections:
+  - name: community.mongodb
+    version: 1.4.2
+
+  - name:  community.mysql
+    version: 3.5.1
