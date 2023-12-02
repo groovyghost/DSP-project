@@ -1,9 +1,9 @@
 mysql_root_password: root@123
-mysql_bind_address: '0.0.0.0'
+mysql_bind_address: "0.0.0.0"
 mysql_databases:
   - name: userdb
 mysql_users:
   - name: user
     host: "%"
-    password: user@123
+    password: user#123
     priv: "userdb.*:ALL"
