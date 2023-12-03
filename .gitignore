@@ -1,4 +1,6 @@
 venv/
+.env/
 .vagrant/
 ansible/collections
 ansible/roles
+__pycache__
