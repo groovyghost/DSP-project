@@ -1,23 +1,17 @@
-from typing import List
-import logging
+from typing import Annotated
 
-
-import uvicorn
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
-from database import Base, SessionLocal, engine
-from models import Users
-
-Base.metadata.create_all(bind=engine)
+import auth
+import models
+from auth import get_current_user
+from database import SessionLocal, engine
 
 app = FastAPI()
+app.include_router(auth.router)
 
-# Configure the logger
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+models.Base.metadata.create_all(bind=engine)
 
 
 def get_db():
@@ -28,54 +22,12 @@ def get_db():
         db.close()
 
 
-class UserSchema(BaseModel):
-    name: str
-    email: str
+db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-class UserCreateSchema(UserSchema):
-    password: str
-
-
-@app.get("/users", response_model=List[UserSchema])
-def get_users(db: Session = Depends(get_db)):
-    return db.query(Users).all()
-
-
-@app.post("/create_users", response_model=UserSchema)
-def create_users(user: UserCreateSchema, db: Session = Depends(get_db)):
-    add_user = Users(name=user.name, email=user.email, password=user.password)
-    db.add(add_user)
-    db.commit()
-    return add_user
-
-
-@app.put("/users/{user_id}", response_model=UserSchema)
-def update_user(user_id: int, user: UserSchema, db: Session = Depends(get_db)):
-    try:
-        u = db.query(Users).filter(Users.id == user_id).first()
-        u.name = user.name
-        u.email = user.email
-        db.add(u)
-        db.commit()
-        return u
-    except Exception as error:
-        logger.error(f"Caught a generic exception: {error}")
-
-        return HTTPException(status_code=404, detail="user not found")
-
-
-@app.delete("/users/{user_id}", response_class=JSONResponse)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    try:
-        u = db.query(Users).filter(Users.id == user_id).first()
-        db.delete(u)
-        db.commit()
-        return u
-    except Exception as error:
-        logger.error(f"Caught a generic exception: {error}")
-        return HTTPException(status_code=404, detail="user not found")
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True, host="127.0.0.1", port=5000, log_level="debug")
+@app.get("/", status_code=status.HTTP_200_OK)
+async def user(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    return {"User": user}
