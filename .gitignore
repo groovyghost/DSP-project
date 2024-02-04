@@ -3,3 +3,4 @@ venv/
 ansible/collections
 ansible/roles
 *.mp4
+.venv
