@@ -2,3 +2,4 @@ venv/
 .vagrant/
 ansible/collections
 ansible/roles
+*.mp4

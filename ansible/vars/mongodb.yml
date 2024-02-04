@@ -1,6 +1,6 @@
 admin_db: admin
 admin_user: admin
-admin_pwd: admin@123
+admin_pwd: admin123
 user_db: users
 user_name: user
-user_pwd: user@123
+user_pwd: user123
